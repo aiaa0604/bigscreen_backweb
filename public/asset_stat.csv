@@ -1,0 +1,3 @@
+stat_date,network_device,security_device,domain_name,middleware,service,application,website,virtual_device,port,host,database_count,os_count,
+2025/7/21,2,3,1,2,3,3,2,3,2,2,2,2,示例数据：时间、网络设备数量、安全设备数量、域名数量、中间件数量、服务数量、应用数量、网站数量、虚拟设备数量、网站端口数量、主机数量、数据库数量、操作系统数量
+,,,,,,,,,,,,,
