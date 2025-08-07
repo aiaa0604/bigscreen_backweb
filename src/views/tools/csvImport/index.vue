@@ -23,7 +23,7 @@
         </el-upload>
         <!-- 默认展示的按钮区域 -->
         <div class="default-actions">
-          <el-button type="primary" icon="el-icon-view" @click="previewFile" :loading="previewLoading" :disabled="!selectedFile">
+                     <el-button type="primary" icon="el-icon-view" @click="previewFile" :loading="previewLoading" :disabled="!selectedFile">
             预览数据
           </el-button>
           <el-button type="success" icon="el-icon-upload" @click="importData" :loading="importLoading" :disabled="!previewData.length || !targetTable">
@@ -32,8 +32,8 @@
           <el-button type="warning" icon="el-icon-delete" @click="clearFile">
             清除文件
           </el-button>
-          <el-button type="info" icon="el-icon-download" @click="downloadTemplate">
-            下载CSV模板
+          <el-button type="info" icon="el-icon-download" @click="downloadTemplate" :disabled="!targetTable">
+            下载示例数据
           </el-button>
         </div>
 
@@ -137,12 +137,13 @@
 # 文件大小不超过10MB</pre>
         <blockquote class="my-blockquote">导入流程</blockquote>
         <pre class="my-code">
-1. 准备CSV文件，确保格式正确
-2. 选择目标表（支持的表类型见对照表）
-3. 拖拽或点击上传文件
-4. 点击"预览数据"查看前10行
-5. 确认格式无误后点击"导入数据"
-6. 等待导入完成并查看结果</pre>
+1. 选择目标表类型（支持的表类型见对照表）
+2. 点击"下载示例数据"获取标准格式文件
+3. 根据示例数据格式准备CSV文件
+4. 拖拽或点击上传文件
+5. 点击"预览数据"查看前10行
+6. 确认格式无误后点击"导入数据"
+7. 等待导入完成并查看结果</pre>
         <blockquote class="my-blockquote">支持的表类型对照</blockquote>
         <pre class="my-code">
 abnormal_event_stat - 网络异常事件统计
@@ -159,13 +160,20 @@ vulnerability_record - 漏洞情况列表
 vulnerability_stat - 漏洞分布情况
 duty_schedule - 值班列表
 device_stat - 设备总览</pre>
+        <blockquote class="my-blockquote">示例数据下载</blockquote>
+        <pre class="my-code">
+# 选择目标表类型后，"下载示例数据"按钮将被激活
+# 点击按钮可下载对应表类型的标准格式示例文件
+# 示例文件包含正确的字段结构和示例数据
+# 可根据示例文件格式准备实际导入数据</pre>
         <blockquote class="my-blockquote">注意事项</blockquote>
         <pre class="my-code">
 # 确保CSV文件格式正确
 # 检查数据编码（建议UTF-8）
 # 大文件建议分批导入
 # 导入前请备份重要数据
-# 选择正确的目标表类型</pre>
+# 选择正确的目标表类型
+# 建议先下载示例数据了解格式要求</pre>
       </div>
     </el-tab-pane>
   </el-tabs>
@@ -297,7 +305,7 @@ export default {
       })
     },
     // 预览文件数据
-    previewData() {
+    previewFile() {
       if (!this.selectedFile) {
         this.$message.warning('请先选择文件')
         return
@@ -375,50 +383,28 @@ export default {
       this.uploadFormData = null
       this.targetTable = ''
     },
-    // 下载模板
+    // 下载示例数据
     downloadTemplate() {
-      // 根据选择的目标表生成对应的模板
-      let templateData = ''
-      
-      if (this.targetTable && this.tableMapping[this.targetTable]) {
-        // 根据表类型生成对应的模板
-        switch (this.targetTable) {
-          case 'abnormal_event_stat':
-            templateData = '统计时间,网络异常次数,登录异常次数,访问异常次数,总异常次数\n2024-01-01,15,28,42,85\n2024-01-02,12,25,38,75'
-            break
-          case 'alarm_count_stat':
-            templateData = '统计日期,尝试次数,成功次数,来源类型,统计年份,统计季度\n2024-07-22,100,0,true,2024,3\n2024-07-15,19,0,false,2024,3'
-            break
-          case 'asset_list':
-            templateData = 'IP地址,端口,系统名称,所属单位\n192.168.1.1,80,Web服务器,技术部\n192.168.1.2,443,数据库服务器,运维部'
-            break
-          case 'attack_flyline':
-            templateData = '源IP,目标IP,源位置名称,目标位置名称,源经度,源纬度,目标经度,目标纬度,攻击方法,目标系统,攻击时间,是否国内来源\n192.168.1.1,10.0.0.1,北京,上海,116.4074,39.9042,121.4737,31.2304,SQL注入,Web服务器,2024-01-01T10:00:00,true'
-            break
-          case 'vulnerability_record':
-            templateData = '系统名称,所属单位,漏洞来源,漏洞类型,漏洞等级,发现时间,修复内容\nCRM系统,营销部,扫描,XSS跨站脚本,中,2024-07-01T12:00:00,更新了Web框架并添加了输入验证'
-            break
-          case 'duty_schedule':
-            templateData = '值班日期,值班人员,联系电话,值班部门,值班开始时间,值班结束时间\n2024-07-01,张三,13800138000,安全运维部,2024-07-01T08:00:00,2024-07-01T20:00:00'
-            break
-          default:
-            templateData = '字段1,字段2,字段3,字段4\n示例数据1,示例数据2,示例数据3,示例数据4'
-        }
-      } else {
-        // 默认模板
-        templateData = '字段1,字段2,字段3,字段4\n示例数据1,示例数据2,示例数据3,示例数据4'
+      if (!this.targetTable) {
+        this.$message.warning('请先选择目标表')
+        return
       }
       
-      const blob = new Blob([templateData], { type: 'text/csv;charset=utf-8' })
-      const url = window.URL.createObjectURL(blob)
+      // 检查是否有对应的示例数据文件
+      const fileName = `${this.targetTable}.csv`
+      
+      // 创建下载链接
       const link = document.createElement('a')
-      link.href = url
-      link.download = `${this.targetTable || 'csv'}_template.csv`
+      link.href = `/${fileName}`
+      link.download = fileName
+      link.target = '_blank'
+      
+      // 添加到DOM并触发下载
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      this.$message.success('模板下载成功')
+      
+      this.$message.success(`示例数据下载成功: ${this.tableMapping[this.targetTable] || this.targetTable}`)
     }
   }
 }
